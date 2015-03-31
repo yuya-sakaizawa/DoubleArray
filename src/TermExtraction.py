@@ -11,10 +11,10 @@ class Rulebase:
     tag_list = []
     flag = 0 
     for morph in morphs:
-      if morph.pos1() == "固有名詞":
+      if morph.pos1() == "固有名詞" and flag == 0:
         tag_list.append((morph.surface(), "B"))
         flag = 1 
-      elif morph.pos() == "名詞" and flag == 1:
+      elif (morph.pos() == "名詞" or morph.surface() == "・") and flag == 1:
         tag_list.append((morph.surface(), "I"))
       else:
         tag_list.append((morph.surface(), "O"))
