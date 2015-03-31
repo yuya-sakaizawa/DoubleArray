@@ -8,6 +8,10 @@ class Rulebase:
   def __init__(self):
     pass
   def _estimate(self, morphs):
+  """
+  input		morphs
+  output	{B, I, O}
+  """
 
 class Model(Rulebase):
   def __init__(self):
@@ -17,6 +21,10 @@ class TermExtractor(Model):
   def __inti__(self):
     pass
   def extract(self, sentence):
+  """
+  input		sentence
+  output	term
+  """
 
 def term_extraction(sentences):
 
