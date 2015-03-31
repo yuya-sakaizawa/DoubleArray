@@ -1,9 +1,0 @@
-#ユーザー辞書ファイル
-/data/user.csv
-#ユーザー辞書作成
-bash create_user_dic.sh ../data/user.csv ~/Downloads/unidic-mecab-2.1.2_src/ user.dic
-#実行
-python extraction_none.py
-
-
-
