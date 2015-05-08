@@ -27,7 +27,11 @@ class DoubleArray:
         for word in words:
             for ch in word:
                 check_index = base[base_index] + code[ch]
-                if check[check_index] == -1 or check[check_index] == base_index:
+                #if check[check_index] == -1 or check[check_index] == base_index:
+                if check[check_index] == base_index:
+                    base_index = check_index
+                    continue
+                elif check[check_index] == -1:
                     check[check_index] = base_index
                     if ch == "#":
                         base[check_index] = -1
@@ -81,16 +85,18 @@ class DoubleArray:
             return True
 
 if __name__ == "__main__":
-    words = ["ca", "cat", "do", "dog", "fox", "rat"]
+    words = ["c", "ca", "cat", "do", "dog", "dogs", "fox", "rat"]
     DA = DoubleArray(words)
     for key, value in sorted(DA.code.items(), key=lambda x:x[1]):
         print key, value
     print DA.base
     print DA.check
+    print DA.search("c")
     print DA.search("ca")
     print DA.search("cat")
     print DA.search("do")
     print DA.search("dog")
+    print DA.search("dogs")
     print DA.search("fox")
     print DA.search("rat")
     print DA.common_prefix_search("cats")
