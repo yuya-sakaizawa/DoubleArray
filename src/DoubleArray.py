@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding:utf-8 -*-
 
-from collections import defaultdict
+import collections
 
 class DoubleArray:
     def __init__(self, words):
@@ -11,59 +11,74 @@ class DoubleArray:
     def _build(self, words):
         base = []
         check = []
-        code = defaultdict(lambda:0)
+        code = {}
         count = 1
         for word in words:
             for ch in word:
                 if ch not in code:
                     code[ch] = count
                     count += 1
-            if None not in code:
-                code[None] = count
-                count += 1
-        decode_word = []
-        decode_words = []
+        code[None] = count
+        encode_word  = []
+        encode_words = []
         for word in words:
             for ch in word:
-                decode_word.append(code[ch])
-            decode_word.append(code[None])
-            decode_words.append(decode_word)
-            decode_word = []
-
+                encode_word.append(code[ch])
+            encode_word.append(code[None])
+            encode_words.append(encode_word)
+            encode_word = []
+        
         base.extend(0 for n in xrange(len(words)*6))
         check.extend(-1 for n in xrange(len(words)*6))
-        base_index = 0
-        check_index = 0
-        for word in decode_words:
-            for ch in word:
-                check_index = base[base_index] + ch
-                if check[check_index] == base_index:
-                    base_index = check_index
-                    continue
-                elif check[check_index] == -1:
-                    check[check_index] = base_index
-                    if ch == code[None]:
-                        base[check_index] = -1
-                    else:
-                        base[check_index] = len(code.items())
-                    base_index = check_index
+        queue = collections.deque([(0, 0, len(words), 0)])
+        while len(queue) > 0:
+            index, left, right, depth = queue.popleft()
+            
+            if depth >= len(encode_words[left]):
+                left += 1
+                if left >= right: continue
+            
+            count = 0
+            result = []
+            ch = encode_words[left][depth]
+            for i in range(left, right):
+                count += 1
+                if encode_words[i][depth] != ch:
+                    result.append((left+count-1, ch))
+                    ch = encode_words[i][depth]
                 else:
-                    for i in range(1, 10000):
-                        check_index += 1
-                        if check[check_index] != -1:
-                            continue
-                        else:
-                            check[check_index] = base_index
-                            if ch == code[None]:
-                                base[check_index] = -1
-                            else:
-                                base[check_index] = len(code.items())
-                            base[base_index] += i
-                            base_index = check_index
-                            break
-            base_index = 0
-        return base, check, code
+                    continue
+            result.append((left+count, ch))
+            
+            base_index = index
+            check_index = 0
+            depth += 1
+            Flag = True
+            i = 0
+            true_left = left
+            result_queue = []
+            while(Flag):
+                for right, ch in result:
+                    check_index = base[base_index] + ch + i
+                    if check[check_index] == -1:
+                        result_queue.append((check_index, left, right, depth, ch))
+                        left = right
+                    else:
+                        result_queue = []
+                        left = true_left
+                        i += 1
+                        break
+                else:
+                    base[base_index] += i
+                    for check_index, left, right, depth, ch in result_queue:
+                        check[check_index] = base_index
+                        if ch == code[None]:
+                            base[check_index] = -1
+                        queue.append((check_index, left, right, depth))
+                    Flag = False
 
+        return base, check, code
+                    
     def common_prefix_search(self, word):
         prefix = ""
         prefix_list = []
@@ -76,11 +91,14 @@ class DoubleArray:
     def search(self, word):
         base_index = 0
         check_index = 0
-        decode_num = []
+        encode_num = []
         for ch in word:
-            decode_num.append(self.code[ch])
-        decode_num.append(self.code[None])
-        for ch in decode_num:
+            try:
+                encode_num.append(self.code[ch])
+            except:
+                return None
+        encode_num.append(self.code[None])
+        for ch in encode_num:
             check_index = self.base[base_index] + int(ch)
             if base_index != self.check[check_index]:
                 return None
@@ -89,7 +107,7 @@ class DoubleArray:
             return True
 
 if __name__ == "__main__":
-    words = ["cat", "center", "cut", "cute", "do", "dog", "fox",  "rat"]
+    words = ["c", "ca", "cat", "center", "cut", "cute", "do", "dog", "fox",  "rat"]
     DA = DoubleArray(words)
     for key, value in sorted(DA.code.items(), key=lambda x:x[1]):
         print key, value
