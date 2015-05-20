@@ -13,48 +13,54 @@ class DoubleArray:
         check = []
         code = defaultdict(lambda:0)
         count = 1
-        words = [word+"#" for word in words]
         for word in words:
             for ch in word:
                 if ch not in code:
                     code[ch] = count
                     count += 1
-
-        base.extend(0 for n in xrange(count*5))
-        check.extend(-1 for n in xrange(count*5))
-        base_index = 0
-        check_index = 0
+            if None not in code:
+                code[None] = count
+                count += 1
+        decode_word = []
+        decode_words = []
         for word in words:
             for ch in word:
-                check_index = base[base_index] + code[ch]
-                #if check[check_index] == -1 or check[check_index] == base_index:
+                decode_word.append(code[ch])
+            decode_word.append(code[None])
+            decode_words.append(decode_word)
+            decode_word = []
+
+        base.extend(0 for n in xrange(len(words)*6))
+        check.extend(-1 for n in xrange(len(words)*6))
+        base_index = 0
+        check_index = 0
+        for word in decode_words:
+            for ch in word:
+                check_index = base[base_index] + ch
                 if check[check_index] == base_index:
                     base_index = check_index
                     continue
                 elif check[check_index] == -1:
                     check[check_index] = base_index
-                    if ch == "#":
+                    if ch == code[None]:
                         base[check_index] = -1
                     else:
                         base[check_index] = len(code.items())
                     base_index = check_index
                 else:
-                    for i in range(1, 100):
+                    for i in range(1, 10000):
                         check_index += 1
                         if check[check_index] != -1:
                             continue
                         else:
                             check[check_index] = base_index
-                            if ch == "#":
+                            if ch == code[None]:
                                 base[check_index] = -1
                             else:
                                 base[check_index] = len(code.items())
                             base[base_index] += i
                             base_index = check_index
                             break
-                print ch
-                print base
-                print check
             base_index = 0
         return base, check, code
 
@@ -63,41 +69,34 @@ class DoubleArray:
         prefix_list = []
         for ch in word:
             prefix += ch
-            print prefix
             if self.search(prefix):
                 prefix_list.append(prefix)
         return prefix_list
-            
 
     def search(self, word):
         base_index = 0
         check_index = 0
-        word = word+"#"
+        decode_num = []
         for ch in word:
-            check_index = self.base[base_index] + self.code[ch]
+            decode_num.append(self.code[ch])
+        decode_num.append(self.code[None])
+        for ch in decode_num:
+            check_index = self.base[base_index] + int(ch)
             if base_index != self.check[check_index]:
-                #print base_index
-                #print check_index
-                #print self.check[check_index]
                 return None
             base_index = check_index
         if self.base[base_index] == -1:
             return True
 
 if __name__ == "__main__":
-    words = ["c", "ca", "cat", "do", "dog", "dogs", "fox", "rat"]
+    words = ["cat", "center", "cut", "cute", "do", "dog", "fox",  "rat"]
     DA = DoubleArray(words)
     for key, value in sorted(DA.code.items(), key=lambda x:x[1]):
         print key, value
-    print DA.base
-    print DA.check
-    print DA.search("c")
-    print DA.search("ca")
+    for i in range(len(DA.base)):
+        print i, DA.base[i], DA.check[i]
+    print words
     print DA.search("cat")
-    print DA.search("do")
-    print DA.search("dog")
-    print DA.search("dogs")
-    print DA.search("fox")
-    print DA.search("rat")
+    print DA.search("cut")
     print DA.common_prefix_search("cats")
 
